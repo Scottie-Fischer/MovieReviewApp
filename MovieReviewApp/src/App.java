@@ -5,62 +5,39 @@ import java.awt.event.*;
 public class App implements ActionListener{
 	JTextField tf_search;
 	JPanel Main_Panel;
-	
+	JFrame Main_Frame;
 	public App(){
+		Main_Frame = new JFrame("Movie Reviewer");
+		Main_Panel = new JPanel();
+		Main_Panel.setLayout(new BoxLayout(Main_Panel, BoxLayout.Y_AXIS));
+		Main_Panel.setVisible(true);
 		
-		tf_search = new JTextField("Search");
-		tf_search.setBounds(5,35,295,35);
-		tf_search.setSize(295,35);
-		tf_search.addActionListener(this);
+		JPanel p1 = new JPanel();	//this will hold the options buttons
+		JPanel p2 = new JPanel();	//this will hold the search functionality
+		JPanel p3 = new JPanel();	//this will hold the list of movie reviews		(may be a Panel of Panels)
 		
-		JFrame f = new JFrame();
+		JButton bNew = new JButton("New");
+		JButton bOptions = new JButton("Options");
+		JButton bExport = new JButton("Export");
 		
-		//Setting Up the Panels
-		JPanel Panel = new JPanel();
-		JPanel Panel2 = new JPanel();
-		Panel.setLayout(new BoxLayout(Panel, BoxLayout.X_AXIS));		//sets the Panel Layout to BoxLayout
-		Panel2.setLayout(new BoxLayout(Panel2,BoxLayout.X_AXIS));
+		p1.add(bNew);
+		p1.add(bOptions);
+		p1.add(bExport);
 		
-		//Creating the Buttons and Such
-		JButton b_New = new JButton("New");
-		b_New.setBounds(0,0,100,25);	//setting x axis, y axis, width, height
+		p1.setVisible(true);
+		p1.setBackground(Color.black);
+		p2.setVisible(true);
+		p2.setBackground(Color.red);
+		p3.setVisible(true);
+		p1.setBackground(Color.blue);
 		
-		JButton b_Option = new JButton("Options");
-		b_Option.setBounds(100,0,100,25);
-		
-		JButton b_Export = new JButton("Export");
-		b_Export.setBounds(200,0,100,25);
-		
-		JButton b_Search = new JButton("Search");
-		b_Search.setBounds(305,35,100,35);
-		b_Search.setSize(100,35);
-		JButton b_new = new JButton("test");
-
-		
-		
-		//Adding the Components to Panel
-		Panel.add(b_New);
-		Panel.add(b_Option);
-		Panel.add(b_Export);
-		//b_New.set
-		Panel.setBackground(Color.white);
-		Panel.setVisible(true);
-		Panel.setSize(300,25);
-		
-		Panel2.add(tf_search);
-		Panel2.add(b_Search);
-		Panel2.setVisible(true);
-		Panel2.setSize(720,100);
-		Panel2.setBounds(0,25,720,100);
-		Panel2.setBackground(Color.red);
-		//Adding Panel to Frame
-		f.add(Panel);
-		f.add(Panel2);
-		
-		//Setting Frame Attributes
-		f.setSize(1080,720);
-		f.setLayout(null);
-		f.setVisible(true);
+		Main_Panel.add(p1);
+		Main_Panel.add(p2);
+		Main_Panel.add(p3);
+		Main_Panel.setVisible(true);
+		Main_Frame.add(Main_Panel);
+		Main_Frame.setSize(1080,720);
+		Main_Frame.setVisible(true);
 	}
 	
 	public void actionPerformed(ActionEvent s) {
