@@ -2,24 +2,28 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class App implements ActionListener{
+public class App extends javax.swing.JFrame{
 	JTextField tf_search;
-	JPanel Main_Panel;
-	JFrame Main_Frame;
+	JPanel Main_Panel,p1,p2,p3;
+	JButton bNew,bOptions,bExport;
+	//JFrame Main_Frame;
+	
 	public App(){
-		Main_Frame = new JFrame("Movie Reviewer");
+		//Main_Frame = new JFrame("Movie Reviewer");
 		Main_Panel = new JPanel();
-		Main_Panel.setLayout(new BoxLayout(Main_Panel, BoxLayout.Y_AXIS));
+		Main_Panel.setLayout(new GridBagLayout());
 		Main_Panel.setVisible(true);
 		
-		JPanel p1 = new JPanel();	//this will hold the options buttons
-		JPanel p2 = new JPanel();	//this will hold the search functionality
-		JPanel p3 = new JPanel();	//this will hold the list of movie reviews		(may be a Panel of Panels)
+		p1 = new JPanel();	//this will hold the options buttons
+		p2 = new JPanel();	//this will hold the search functionality
+		p3 = new JPanel();	//this will hold the list of movie reviews		(may be a Panel of Panels)
 		
-		JButton bNew = new JButton("New");
-		JButton bOptions = new JButton("Options");
-		JButton bExport = new JButton("Export");
+		bNew = new JButton("New");
+		bNew.setBounds(0,0,100,100);
+		bOptions = new JButton("Options");
+		bExport = new JButton("Export");
 		
+		setPreferredSize(new Dimension(1080,720));
 		p1.add(bNew);
 		p1.add(bOptions);
 		p1.add(bExport);
@@ -35,9 +39,8 @@ public class App implements ActionListener{
 		Main_Panel.add(p2);
 		Main_Panel.add(p3);
 		Main_Panel.setVisible(true);
-		Main_Frame.add(Main_Panel);
-		Main_Frame.setSize(1080,720);
-		Main_Frame.setVisible(true);
+		getContentPane().add(Main_Panel);
+		pack();
 	}
 	
 	public void actionPerformed(ActionEvent s) {
@@ -47,7 +50,7 @@ public class App implements ActionListener{
 	}
 	
 	public static void main(String[] args){
-		new App();
+		new App().setVisible(true);
 	}
 	
 }
