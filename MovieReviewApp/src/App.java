@@ -35,25 +35,6 @@ public class App extends javax.swing.JFrame{
 		}
 		//--------------------------------------------------------------------------
 		//Buttons
-		
-		bNew = new JButton("New");
-		constraint.gridx = 0;
-		constraint.gridy = 0;
-		pane.add(bNew,constraint);
-		
-		
-		//Adding a button for option menu
-		bOptions = new JButton("Options");
-		constraint.gridx = 1;
-		constraint.gridy = 0;
-		pane.add(bOptions,constraint);
-		
-		//Adding Export option for exporting to a txt? file
-		bExport = new JButton("Export");
-		constraint.gridx = 2;
-		constraint.gridy = 0;
-		pane.add(bExport,constraint);
-		
 		//Adding a text box for search function
 		tf_search = new JTextField("Enter a Movie Title");
 		constraint.fill = GridBagConstraints.HORIZONTAL;
@@ -72,7 +53,7 @@ public class App extends javax.swing.JFrame{
 	}
 	
 	//We add buttons to our tool bar here-------------------------
-	public static void buildToolBar(JFrame frame){
+	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel){
 		MenuBar toolBar = new MenuBar();
 		
 		//Main Menu Options
@@ -83,13 +64,23 @@ public class App extends javax.swing.JFrame{
 		Menu export = new Menu("Export");
 	
 		//Sub Menus and Menu Buttons
+		MenuItem fullscreen = new MenuItem("Fullscreen");
+		fullscreen.addActionListener ( new ActionListener(){
+			public void actionPerformed(ActionEvent e ){
+				frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			}
+		});
 		
 		MenuItem lightMode = new MenuItem("Light Mode");
 		lightMode.addActionListener ( new ActionListener()  
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
-	        frame.setBackground(Color.white); 
+	        frame.setBackground(frame.getBackground().darker()); 
+	        //right_panel.setForeground(right_panel.getForeground().brighter());
+	        right_panel.setBackground(new Color(155,155,155));
+	        left_panel.setBackground(new Color(155,155,155));
+	        System.out.println("Currently is: " + right_panel.getBackground());
 	        System.out.println("We light now");
 	      }  
 	    });
@@ -99,6 +90,8 @@ public class App extends javax.swing.JFrame{
 	      public void actionPerformed( ActionEvent e )  
 	      {  
 	        frame.setBackground(Color.black.brighter());  
+	        right_panel.setBackground(new Color(62,62,62));
+	        left_panel.setBackground(new Color(62,62,62));
 	        System.out.println("We dark now");
 	      }  
 	    });
@@ -113,35 +106,103 @@ public class App extends javax.swing.JFrame{
 	      }  
 	    });
 		
+		//Adding our buttons and sub menus
 		file.add(bNew);
 		
+		options.add(fullscreen);
 		options.add(lightMode);
 		options.add(darkMode);
 		
+		//Adding the menus to the tool bar
 		toolBar.add(file);
 		toolBar.add(options);
 		toolBar.add(export);
 		
+		//Adding the menu bar to the frame
 		frame.setMenuBar(toolBar);
 	
 	}
 	
-	
+	public static void buildPanels(JPanel encompassing_panel) {
+		
+	}
 	// Creating our Frame/Window-----------------------------------
 	private static void createFrame() {
-		JFrame.setDefaultLookAndFeelDecorated(true);
+		//JFrame.setDefaultLookAndFeelDecorated(true);
 		
-		JFrame Main_Frame = new JFrame("Move Reviewist");
+		//This is the main frame of the window
+		JFrame main_frame = new JFrame("Movie Reviewst");
+		main_frame.setUndecorated(false);
 		
-		buildToolBar(Main_Frame);
+		//Lets set up the Layout - right now we are choosing BorderLayout
+		Container pane = main_frame.getContentPane();
 		
-		Main_Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	//when window is closed the program closed
-		Main_Frame.setUndecorated(true);
-		Main_Frame.pack();											//adds all the components and sets things before it makes the window visible
-		assemble_Frame(Main_Frame.getContentPane());
+		//GridBagConstraints constraint = new GridBagConstraints();
 		
-		Main_Frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//Sets the Window to Full Screen when opened
-		Main_Frame.setVisible(true);
+		
+		//Lets set up the panels-----------------------------------
+		JPanel search_panel = new JPanel();
+		search_panel.setBackground(Color.blue);
+		
+		JPanel panel_grid = new JPanel();
+		panel_grid.setBackground(Color.red);
+		panel_grid.setLayout(new GridBagLayout());
+		
+		JPanel right_panel = new JPanel();
+		right_panel.setBackground(Color.black);
+		
+		JPanel left_panel = new JPanel();
+		left_panel.setBackground(Color.green);
+		
+		//Setting up constraints for our two panels-----------------
+		GridBagConstraints panel_constraints = new GridBagConstraints();
+		panel_constraints.insets = new Insets(5,2,2,2);
+		
+		panel_constraints.gridx = 0;
+		panel_constraints.gridy = 0;
+		panel_constraints.weightx = 1;
+		panel_constraints.fill = GridBagConstraints.HORIZONTAL;
+		
+		panel_grid.add(left_panel,panel_constraints);
+		
+		panel_constraints.gridx++;
+		
+		panel_grid.add(right_panel,panel_constraints);
+		
+		//---------------------------------------------------------
+		
+		
+		
+		//Search Panel Elements
+		JTextField tf_search = new JTextField("Enter a Movie Title");
+		search_panel.add(tf_search);
+		
+		JButton b_search = new JButton("Search");
+		search_panel.add(b_search);
+		
+		
+		//Building our Tool Bar
+		buildToolBar(main_frame,right_panel,left_panel);
+		
+		
+		//Adding all the components to the Main Frame
+		pane.add(search_panel,BorderLayout.NORTH);
+		pane.add(panel_grid,BorderLayout.CENTER);
+		//panel_grid.add(left_panel);
+		//panel_grid.add(right_panel);
+
+		
+		Dimension min_size = new Dimension(400,400);
+		main_frame.setResizable(true);
+		main_frame.setMinimumSize(min_size);
+		
+		main_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);	//when window is closed the program closed
+		main_frame.pack();											//adds all the components and sets things before it makes the window visible
+		//assemble_Frame(Main_Frame.getContentPane());
+		
+		main_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//Sets the Window to Full Screen when opened
+		main_frame.setVisible(true);
+		
 	}
 	
 	/*
@@ -168,12 +229,13 @@ public class App extends javax.swing.JFrame{
 			System.out.println(e.getMessage());
 		}
 		*/
+		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() { 
 			   
             public void run() { 
                 createFrame(); 
             } 
-        }); 
+        });
 	}
 	
 }
