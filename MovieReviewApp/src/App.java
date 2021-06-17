@@ -145,7 +145,7 @@ public class App extends javax.swing.JFrame{
 		search_panel.setBackground(Color.blue);
 		
 		JPanel panel_grid = new JPanel();
-		panel_grid.setBackground(Color.red);
+		panel_grid.setBackground(Color.white);
 		panel_grid.setLayout(new GridBagLayout());
 		
 		JPanel right_panel = new JPanel();
@@ -160,13 +160,14 @@ public class App extends javax.swing.JFrame{
 		
 		panel_constraints.gridx = 0;
 		panel_constraints.gridy = 0;
-		panel_constraints.weightx = 1;
+		panel_constraints.weightx = 0.25;	
+		panel_constraints.ipady= 1000;		
 		panel_constraints.fill = GridBagConstraints.HORIZONTAL;
 		
 		panel_grid.add(left_panel,panel_constraints);
 		
 		panel_constraints.gridx++;
-		
+		panel_constraints.weightx = 1;
 		panel_grid.add(right_panel,panel_constraints);
 		
 		//---------------------------------------------------------
