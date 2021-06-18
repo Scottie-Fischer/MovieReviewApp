@@ -53,7 +53,7 @@ public class App extends javax.swing.JFrame{
 	}
 	
 	//We add buttons to our tool bar here-------------------------
-	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel){
+	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel){
 		MenuBar toolBar = new MenuBar();
 		
 		//Main Menu Options
@@ -76,10 +76,11 @@ public class App extends javax.swing.JFrame{
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
-	        frame.setBackground(frame.getBackground().darker()); 
-	        //right_panel.setForeground(right_panel.getForeground().brighter());
+	        frame.setBackground(new Color(155,155,155));
 	        right_panel.setBackground(new Color(155,155,155));
 	        left_panel.setBackground(new Color(155,155,155));
+	        search_panel.setBackground(new Color(155,155,155));
+	        grid_panel.setBackground(new Color(200,200,200));
 	        System.out.println("Currently is: " + right_panel.getBackground());
 	        System.out.println("We light now");
 	      }  
@@ -89,9 +90,11 @@ public class App extends javax.swing.JFrame{
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
-	        frame.setBackground(Color.black.brighter());  
+	        frame.setBackground(new Color(62,62,62));  
 	        right_panel.setBackground(new Color(62,62,62));
 	        left_panel.setBackground(new Color(62,62,62));
+	        search_panel.setBackground(new Color(62,62,62));
+	        grid_panel.setBackground(new Color(32,32,32));
 	        System.out.println("We dark now");
 	      }  
 	    });
@@ -137,8 +140,6 @@ public class App extends javax.swing.JFrame{
 		//Lets set up the Layout - right now we are choosing BorderLayout
 		Container pane = main_frame.getContentPane();
 		
-		//GridBagConstraints constraint = new GridBagConstraints();
-		
 		
 		//Lets set up the panels-----------------------------------
 		JPanel search_panel = new JPanel();
@@ -160,9 +161,10 @@ public class App extends javax.swing.JFrame{
 		
 		panel_constraints.gridx = 0;
 		panel_constraints.gridy = 0;
-		panel_constraints.weightx = 0.25;	
-		panel_constraints.ipady= 1000;		
-		panel_constraints.fill = GridBagConstraints.HORIZONTAL;
+		panel_constraints.weightx = 0.25;
+		panel_constraints.weighty = 0.25;
+		//panel_constraints.ipady = 10000;		
+		panel_constraints.fill = GridBagConstraints.BOTH;
 		
 		panel_grid.add(left_panel,panel_constraints);
 		
@@ -171,28 +173,29 @@ public class App extends javax.swing.JFrame{
 		panel_grid.add(right_panel,panel_constraints);
 		
 		//---------------------------------------------------------
+	
 		
-		
-		
-		//Search Panel Elements
+		//Search Panel Elements------------------------------------
 		JTextField tf_search = new JTextField("Enter a Movie Title");
 		search_panel.add(tf_search);
 		
 		JButton b_search = new JButton("Search");
+		b_search.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Searching for:" + tf_search.getText());
+			}
+		});
 		search_panel.add(b_search);
 		
 		
-		//Building our Tool Bar
-		buildToolBar(main_frame,right_panel,left_panel);
+		//Building our Tool Bar------------------------------------
+		buildToolBar(main_frame,right_panel,left_panel,search_panel,panel_grid);
 		
 		
-		//Adding all the components to the Main Frame
+		//Adding all the components to the Main Frame--------------
 		pane.add(search_panel,BorderLayout.NORTH);
 		pane.add(panel_grid,BorderLayout.CENTER);
-		//panel_grid.add(left_panel);
-		//panel_grid.add(right_panel);
 
-		
 		Dimension min_size = new Dimension(400,400);
 		main_frame.setResizable(true);
 		main_frame.setMinimumSize(min_size);
@@ -206,12 +209,12 @@ public class App extends javax.swing.JFrame{
 		
 	}
 	
-	/*
+	
 	public void actionPerformed(ActionEvent s) {
-		String search_holder = tf_search.getText();
-		System.out.print(search_holder);
+		int e = s.ACTION_FIRST;
+		System.out.println(e);
 	}
-	*/
+	
 	public static void main(String[] args){
 		Connection conn = null;
 		String fileName = "movieDB";				//This is the file name to our DB
