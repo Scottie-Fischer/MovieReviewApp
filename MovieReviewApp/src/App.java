@@ -2,14 +2,15 @@ import javax.swing.*;
 import javax.swing.JFrame;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Connection;  
-import java.sql.DriverManager;  
-import java.sql.SQLException;  
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.io.File;
 
 public class App extends javax.swing.JFrame{
 	
-	JPanel Main_Panel,p1,p2,p3;
+	JPanel Main_Panel,right_panel,left_panel;
 	
 	final static boolean RIGHT_TO_LEFT = false;
 	final static boolean shouldFill = true; 
@@ -137,6 +138,7 @@ public class App extends javax.swing.JFrame{
 		JFrame main_frame = new JFrame("Movie Reviewst");
 		main_frame.setUndecorated(false);
 		
+		
 		//Lets set up the Layout - right now we are choosing BorderLayout
 		Container pane = main_frame.getContentPane();
 		
@@ -144,6 +146,7 @@ public class App extends javax.swing.JFrame{
 		//Lets set up the panels-----------------------------------
 		JPanel search_panel = new JPanel();
 		search_panel.setBackground(Color.blue);
+		search_panel.setLayout(new GridBagLayout());
 		
 		JPanel panel_grid = new JPanel();
 		panel_grid.setBackground(Color.white);
@@ -163,7 +166,6 @@ public class App extends javax.swing.JFrame{
 		panel_constraints.gridy = 0;
 		panel_constraints.weightx = 0.25;
 		panel_constraints.weighty = 0.25;
-		//panel_constraints.ipady = 10000;		
 		panel_constraints.fill = GridBagConstraints.BOTH;
 		
 		panel_grid.add(left_panel,panel_constraints);
@@ -173,11 +175,18 @@ public class App extends javax.swing.JFrame{
 		panel_grid.add(right_panel,panel_constraints);
 		
 		//---------------------------------------------------------
-	
+		
+		GridBagConstraints search_constraints = new GridBagConstraints();
+		search_constraints.insets = new Insets(7,5,7,5);	//(top, side, bottom, side)
+		search_constraints.gridx = 0;
+		search_constraints.gridy = 0;
+		search_constraints.ipadx = 100;
+		search_constraints.weightx = 0.95;
+		search_constraints.fill = GridBagConstraints.HORIZONTAL;
 		
 		//Search Panel Elements------------------------------------
 		JTextField tf_search = new JTextField("Enter a Movie Title");
-		search_panel.add(tf_search);
+		search_panel.add(tf_search,search_constraints);
 		
 		JButton b_search = new JButton("Search");
 		b_search.addActionListener(new ActionListener() {
@@ -185,7 +194,10 @@ public class App extends javax.swing.JFrame{
 				System.out.println("Searching for:" + tf_search.getText());
 			}
 		});
-		search_panel.add(b_search);
+
+		search_constraints.gridx++;
+		search_constraints.weightx = 0.05;
+		search_panel.add(b_search,search_constraints);
 		
 		
 		//Building our Tool Bar------------------------------------
@@ -207,6 +219,9 @@ public class App extends javax.swing.JFrame{
 		main_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//Sets the Window to Full Screen when opened
 		main_frame.setVisible(true);
 		
+		
+		String pathway = selectFilePath(main_frame);
+		databaseSetup(pathway);
 	}
 	
 	
@@ -215,24 +230,45 @@ public class App extends javax.swing.JFrame{
 		System.out.println(e);
 	}
 	
-	public static void main(String[] args){
-		Connection conn = null;
-		String fileName = "movieDB";				//This is the file name to our DB
+	
+	public static String selectFilePath(JFrame main_frame) {
+		String path = "C:/sqlite/db/reviewst.db";
 		
-		//We try to connect to our DB which is set to 'fileName'
-		/*
-		try {
-			String url = "jdbc:sqlite:C:/sqlite/JTP.db" + fileName;
-			conn = DriverManager.getConnection(url);
-			if(conn != null) {
-				DatabaseMetaData meta = conn.getMetaData();
-				 System.out.println("The driver name is " + meta.getDriverName());  
-	             System.out.println("A new database has been created.");  
+		JFileChooser file_selector = new JFileChooser();
+		file_selector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+		file_selector.setCurrentDirectory(new File(System.getProperty("user.home")));
+		int result = file_selector.showOpenDialog(main_frame);
+		if(result == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = file_selector.getSelectedFile();
+			System.out.println("Selected file: " + selectedFile.getAbsolutePath());
 		}
-		}catch(SQLException e) {
-			System.out.println(e.getMessage());
-		}
-		*/
+		
+		return path;
+	}
+	
+	public static void databaseSetup(String path) {
+		//Connect to DataBase------------------------------------
+		
+				//Connection conn = null;
+				
+				String url = "jdbc:sqlite:" + path;
+				
+				try(Connection conn = DriverManager.getConnection(url)) {
+					if (conn != null) {
+		                DatabaseMetaData meta = conn.getMetaData();
+		                System.out.println("The driver name is " + meta.getDriverName());
+		                System.out.println("A new database has been created.");
+		            }
+				}catch(SQLException e){
+					System.out.println(e.getMessage());
+					System.exit(1);
+				}
+				
+				//-------------------------------------------------------
+	}
+	
+	public static void main(String[] args){
 		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() { 
 			   
