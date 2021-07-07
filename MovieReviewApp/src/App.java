@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Statement;
 import java.io.File;
+import java.util.Hashtable;
 
 public class App extends javax.swing.JFrame{
 	
@@ -54,7 +56,7 @@ public class App extends javax.swing.JFrame{
 	}
 	
 	//We add buttons to our tool bar here-------------------------
-	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel){
+	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel, JButton b_search){
 		MenuBar toolBar = new MenuBar();
 		
 		//Main Menu Options
@@ -82,6 +84,7 @@ public class App extends javax.swing.JFrame{
 	        left_panel.setBackground(new Color(155,155,155));
 	        search_panel.setBackground(new Color(155,155,155));
 	        grid_panel.setBackground(new Color(200,200,200));
+	        b_search.setBackground(new Color(184,201,230));
 	        System.out.println("Currently is: " + right_panel.getBackground());
 	        System.out.println("We light now");
 	      }  
@@ -96,6 +99,8 @@ public class App extends javax.swing.JFrame{
 	        left_panel.setBackground(new Color(62,62,62));
 	        search_panel.setBackground(new Color(62,62,62));
 	        grid_panel.setBackground(new Color(32,32,32));
+	        b_search.setBackground(new Color(238,238,238));
+	        b_search.setForeground(new Color(51,51,51));
 	        System.out.println("We dark now");
 	      }  
 	    });
@@ -105,8 +110,20 @@ public class App extends javax.swing.JFrame{
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
-	        frame.setBackground(Color.white); 
+	    	//TODO: create a new panel(?) and add it to left_panel
+			//TODO: add an entry into the DB for a new entry
+			createNewEntry(right_panel);
+	    	
 	        System.out.println("Make New Module");
+	      }  
+	    });
+		MenuItem bSave = new MenuItem("Save");
+		bSave.addActionListener ( new ActionListener()  
+	    {  
+	      public void actionPerformed( ActionEvent e )  
+	      {  
+	    	//TODO:create functionality to insert or update the review to the DB
+	        System.out.println("Saving Entry to DB");
 	      }  
 	    });
 		
@@ -127,6 +144,76 @@ public class App extends javax.swing.JFrame{
 	
 	}
 	
+	//Function that create the components for a new review
+	public static void createNewEntry(JPanel parent_panel) {
+		parent_panel.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(2,2,2,2);
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.weightx = 0.75;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		
+		JTextField title = new JTextField("Title");
+		title.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (title.getText().trim().equals("Title")){
+					title.setText("");
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				if(title.getText().trim().equals("")) {
+					title.setText("Title");
+				}
+			}
+		});
+		title.setSize(200,50);
+		parent_panel.add(title,gbc);
+		
+		gbc.weightx = 0.25;
+		gbc.gridx = 1;
+		
+		//Custom Labels for the Rating Slider
+		Hashtable labelTable = new Hashtable();
+		labelTable.put(0,new JLabel("0"));
+		labelTable.put(5,new JLabel("2.5"));	
+		labelTable.put(10,new JLabel("5"));
+		labelTable.put(15,new JLabel("7.5"));	
+		labelTable.put(20,new JLabel("10"));
+		
+		
+		JSlider rating = new JSlider(JSlider.HORIZONTAL,0,20,0);
+		
+		rating.setLabelTable(labelTable);
+		rating.setMajorTickSpacing(2);
+		rating.setMinorTickSpacing(1);
+		rating.setPaintTicks(true);
+		rating.setPaintLabels(true);
+		parent_panel.add(rating,gbc);
+		
+		JTextField review = new JTextField("Write Your Review Here");
+		review.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (review.getText().trim().equals("Write Your Review Here")){
+					review.setText("");
+				}
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				if(review.getText().trim().equals("")) {
+					review.setText("Write Your Review Here");
+				}
+			}
+		});
+		
+		parent_panel.validate();
+	}
+	
 	public static void buildPanels(JPanel encompassing_panel) {
 		
 	}
@@ -135,7 +222,7 @@ public class App extends javax.swing.JFrame{
 		//JFrame.setDefaultLookAndFeelDecorated(true);
 		
 		//This is the main frame of the window
-		JFrame main_frame = new JFrame("Movie Reviewst");
+		JFrame main_frame = new JFrame("Movie Reviewer");
 		main_frame.setUndecorated(false);
 		
 		
@@ -189,6 +276,9 @@ public class App extends javax.swing.JFrame{
 		search_panel.add(tf_search,search_constraints);
 		
 		JButton b_search = new JButton("Search");
+		
+		System.out.println(b_search.getForeground().toString());
+		System.out.println(b_search.getBackground().toString());
 		b_search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Searching for:" + tf_search.getText());
@@ -201,7 +291,7 @@ public class App extends javax.swing.JFrame{
 		
 		
 		//Building our Tool Bar------------------------------------
-		buildToolBar(main_frame,right_panel,left_panel,search_panel,panel_grid);
+		buildToolBar(main_frame,right_panel,left_panel,search_panel,panel_grid,b_search);
 		
 		
 		//Adding all the components to the Main Frame--------------
@@ -232,7 +322,7 @@ public class App extends javax.swing.JFrame{
 	
 	
 	public static String selectFilePath(JFrame main_frame) {
-		String path = "C:/sqlite/db/reviewst.db";
+		String path = "C:/sqlite/db";			//Default path
 		
 		JFileChooser file_selector = new JFileChooser();
 		file_selector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -242,6 +332,7 @@ public class App extends javax.swing.JFrame{
 		if(result == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = file_selector.getSelectedFile();
 			System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+			path = selectedFile.getAbsolutePath();
 		}
 		
 		return path;
@@ -250,22 +341,34 @@ public class App extends javax.swing.JFrame{
 	public static void databaseSetup(String path) {
 		//Connect to DataBase------------------------------------
 		
-				//Connection conn = null;
-				
-				String url = "jdbc:sqlite:" + path;
-				
-				try(Connection conn = DriverManager.getConnection(url)) {
-					if (conn != null) {
-		                DatabaseMetaData meta = conn.getMetaData();
-		                System.out.println("The driver name is " + meta.getDriverName());
-		                System.out.println("A new database has been created.");
-		            }
-				}catch(SQLException e){
+		//Connection conn = null;
+		
+		String url = "jdbc:sqlite:" + path + "/MovieReviewer.db";
+		
+		try(Connection conn = DriverManager.getConnection(url)) {
+			if (conn != null) {
+                DatabaseMetaData meta = conn.getMetaData();
+                System.out.println("The driver name is " + meta.getDriverName());
+                System.out.println("A new database has been created.");
+            }
+		}catch(SQLException e){
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
+		
+		//-------------------------------------------------------
+		//Creating Table if it doesn't exist---------------------
+		String sql = "CREATE TABLE IF NOT EXISTS REVIEWS" +
+				"(id integer PRIMARY KEY,"+
+				"	title text)";
+		
+		try(Connection conn = DriverManager.getConnection(url);
+				Statement stmt = conn.createStatement()){
+					stmt.executeUpdate(sql);
+				}catch(Exception e) {
 					System.out.println(e.getMessage());
 					System.exit(1);
 				}
-				
-				//-------------------------------------------------------
 	}
 	
 	public static void main(String[] args){
@@ -278,4 +381,27 @@ public class App extends javax.swing.JFrame{
         });
 	}
 	
+}
+
+class JSearchButton extends JButton{
+	private Color color1, color2;
+	
+	public JSearchButton(String text, Color color1, Color color2) {
+		super(text);
+		this.color1 = color1;
+		this.color2 = color2;
+		setOpaque(false);
+	}
+	 public void paintComponent(Graphics g)
+	    {
+	        Graphics2D g2 = (Graphics2D)g;
+	        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+	                            RenderingHints.VALUE_ANTIALIAS_ON);
+	        int width = getWidth();
+	        int height = getHeight();
+	        Paint gradient = new GradientPaint(0, 0, color1, width, height, color2);
+	        g2.setPaint(gradient);
+	        g2.fillRect(0, 0, width, height);
+	        super.paintComponent(g);
+	    }
 }
