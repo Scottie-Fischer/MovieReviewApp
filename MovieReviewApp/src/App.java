@@ -10,6 +10,12 @@ import java.sql.Statement;
 import java.io.File;
 import java.util.Hashtable;
 
+//Test
+import java.util.HashSet;
+import java.util.Set;
+import javax.swing.JFrame;
+//
+
 public class App extends javax.swing.JFrame{
 	
 	JPanel Main_Panel,right_panel,left_panel;
@@ -155,6 +161,7 @@ public class App extends javax.swing.JFrame{
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
 		JTextField title = new JTextField("Title");
+		title.setPreferredSize(new Dimension(150,35));
 		title.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -186,7 +193,10 @@ public class App extends javax.swing.JFrame{
 		
 		
 		JSlider rating = new JSlider(JSlider.HORIZONTAL,0,20,0);
-		
+		//Font rFont = rating.getFont().deriveFont(8);
+		//rating.setFont(rFont);
+		//rating.setFont(rating.getFont());
+		rating.setPreferredSize(new Dimension(50,40));
 		rating.setLabelTable(labelTable);
 		rating.setMajorTickSpacing(2);
 		rating.setMinorTickSpacing(1);
@@ -195,6 +205,7 @@ public class App extends javax.swing.JFrame{
 		parent_panel.add(rating,gbc);
 		
 		JTextField review = new JTextField("Write Your Review Here");
+		review.setPreferredSize(new Dimension(200,500));
 		review.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -210,6 +221,56 @@ public class App extends javax.swing.JFrame{
 				}
 			}
 		});
+		gbc.gridx = 0;
+		gbc.gridwidth = 2;
+		gbc.gridheight = 5;
+		gbc.gridy = 1;
+		parent_panel.add(review,gbc);
+		
+		//Create the Director Text Field
+		JTextField director = new JTextField("Enter this Film's Director Here");
+		director.setPreferredSize(new Dimension(50,35));
+		director.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (director.getText().trim().equals("Enter this Film's Director Here")) {
+					director.setText("");
+				}
+			}
+			public void focusLost(FocusEvent e) {
+				if(director.getText().trim().equals("")) {
+					director.setText("Enter this Film's Director Here");
+				}
+			
+			}
+		});
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+		gbc.gridy = 6;
+		parent_panel.add(director,gbc);
+		
+		//Create the Genre List
+		String genreList[] = {"Action", "Adventure","Comedy","Drama","Fantasy","Horror","Mystery","Pyschological","Romance","Scifi","Thriller","Western"};
+		JList genres = new JList(genreList);
+		JComboBox comboBox = new JComboBox(genreList);
+		comboBox.setPreferredSize(new Dimension(50,35));
+		comboBox.setLightWeightPopupEnabled(true);
+		gbc.gridx = 1;
+		parent_panel.add(comboBox,gbc);
+		
+		
+		//Testing---------------------
+		
+		JTextField holder = new JTextField("temp");
+		holder.setPreferredSize(new Dimension(200,50));
+		gbc.gridx = 0;
+		gbc.gridy = 7;
+		gbc.gridwidth = 2;
+		gbc.weighty = 1.0;
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		
+		parent_panel.add(holder,gbc);
+		//----------------------------
 		
 		parent_panel.validate();
 	}
@@ -321,6 +382,9 @@ public class App extends javax.swing.JFrame{
 	}
 	
 	
+	//This is the function used to select file path for the DB
+	//Function takes in the main_frame as argument
+	//Function returns string: "path"
 	public static String selectFilePath(JFrame main_frame) {
 		String path = "C:/sqlite/db";			//Default path
 		
