@@ -2,13 +2,17 @@ import javax.swing.*;
 import javax.swing.JFrame;
 import java.awt.*;
 import java.awt.event.*;
+
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Statement;
+
 import java.io.File;
 import java.util.Hashtable;
+import java.util.Properties;
 
 //Test
 import java.util.HashSet;
@@ -24,7 +28,7 @@ public class App extends javax.swing.JFrame{
 	final static boolean shouldFill = true; 
     final static boolean shouldWeightX = true;
 	
-	
+	/*
 	public static void assemble_Frame(Container pane) {
 		JButton bNew,bOptions,bExport,bSearch;
 		JTextField tf_search;
@@ -45,7 +49,8 @@ public class App extends javax.swing.JFrame{
 		//--------------------------------------------------------------------------
 		//Buttons
 		//Adding a text box for search function
-		tf_search = new JTextField("Enter a Movie Title");
+		tf_search = new JTextField("");
+		//tf_search.setToolTipText("Enter a Movie Title");
 		constraint.fill = GridBagConstraints.HORIZONTAL;
 		constraint.ipady = 20;
 		constraint.weightx = 0.0;
@@ -60,9 +65,9 @@ public class App extends javax.swing.JFrame{
 		constraint.gridy = 1;
 		pane.add(bSearch,constraint);
 	}
-	
+	*/
 	//We add buttons to our tool bar here-------------------------
-	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel, JButton b_search){
+	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel, JButton b_search,String url){
 		MenuBar toolBar = new MenuBar();
 		
 		//Main Menu Options
@@ -71,7 +76,23 @@ public class App extends javax.swing.JFrame{
 		Menu options = new Menu("Options");
 				
 		Menu export = new Menu("Export");
-	
+		
+		//--------------------------------
+		JTextField title = new JTextField("Title");
+		
+		String genreList[] = {"Action", "Adventure","Comedy","Drama","Fantasy","Horror","Mystery","Pyschological","Romance","Scifi","Thriller","Western"};
+		JList genres = new JList(genreList);
+		JComboBox comboBox = new JComboBox(genreList);
+		
+		JSlider rating = new JSlider(JSlider.HORIZONTAL,0,20,0);
+		
+		JTextArea review = new JTextArea("Write Your Review Here");
+		
+		JTextField director = new JTextField("Enter this Film's Director Here");
+		
+		JTextField holder = new JTextField("temp");
+		//--------------------------------
+		
 		//Sub Menus and Menu Buttons
 		MenuItem fullscreen = new MenuItem("Fullscreen");
 		fullscreen.addActionListener ( new ActionListener(){
@@ -93,6 +114,15 @@ public class App extends javax.swing.JFrame{
 	        b_search.setBackground(new Color(184,201,230));
 	        System.out.println("Currently is: " + right_panel.getBackground());
 	        System.out.println("We light now");
+	        
+			//Light Mode
+			director.setBackground(new Color(205,205,205));
+			review.setBackground(new Color(205,205,205));
+			comboBox.setBackground(new Color(205,205,205));
+			rating.setBackground(new Color(205,205,205));
+			holder.setBackground(new Color(205,205,205));
+			title.setBackground(new Color(205,205,205));
+	        
 	      }  
 	    });
 		MenuItem darkMode = new MenuItem("Dark Mode");
@@ -107,9 +137,23 @@ public class App extends javax.swing.JFrame{
 	        grid_panel.setBackground(new Color(32,32,32));
 	        b_search.setBackground(new Color(238,238,238));
 	        b_search.setForeground(new Color(51,51,51));
+	        
+	        
+	      //Dark Mode
+			director.setBackground(new Color(165,165,165));
+			review.setBackground(new Color(165,165,165));
+			comboBox.setBackground(new Color(165,165,165));
+			rating.setBackground(new Color(165,165,165));
+			holder.setBackground(new Color(165,165,165));
+			title.setBackground(new Color(165,165,165));
+	        //Setting Components
+	        //director.setBackground(new Color(175,175,175));
+	        
 	        System.out.println("We dark now");
+	        
 	      }  
 	    });
+		
 		
 		MenuItem bNew = new MenuItem("New");
 		bNew.addActionListener ( new ActionListener()  
@@ -118,7 +162,8 @@ public class App extends javax.swing.JFrame{
 	      {  
 	    	//TODO: create a new panel(?) and add it to left_panel
 			//TODO: add an entry into the DB for a new entry
-			createNewEntry(right_panel);
+	    	
+			createNewEntry(right_panel,title,rating,review,director,comboBox,holder);
 	    	
 	        System.out.println("Make New Module");
 	      }  
@@ -129,12 +174,41 @@ public class App extends javax.swing.JFrame{
 	      public void actionPerformed( ActionEvent e )  
 	      {  
 	    	//TODO:create functionality to insert or update the review to the DB
-	        System.out.println("Saving Entry to DB");
+	    	int ID = 0;
+	    	String title_data = title.getText();
+	    	Double rating_data = (rating.getValue()/2.0);
+	    	String dir_data = director.getText();
+	    	
+	    	String sql_string = "INSERT INTO REVIEWS (ID,title,rating,director) " +
+	    						"VALUES (?,?,?,?)";
+	    	
+	    	try{
+	    		System.out.println("Attempting to establish connection: " + url);
+	    		
+	    		String URL = "jdbc:sqlite:" + url + "/MovieReviewer.db"; 
+	    		Connection con = DriverManager.getConnection(URL);
+	    		con.setAutoCommit(false);
+	    		
+	    		System.out.println("Connection Established.");
+	    		
+	    		PreparedStatement sql_exe = con.prepareStatement(sql_string);
+	    		sql_exe.setInt(1,ID);
+	    		sql_exe.setString(2,title_data);
+	    		sql_exe.setDouble(3,rating_data);
+	    		sql_exe.setString(4,dir_data);
+	    		sql_exe.executeUpdate();
+	    		con.commit();
+	    	}catch(Exception ex){
+	    		System.out.println("Error saving value to DB: " + ex.getMessage());
+	    		System.exit(1);
+	    	}
+	        
 	      }  
 	    });
 		
 		//Adding our buttons and sub menus
 		file.add(bNew);
+		file.add(bSave);
 		
 		options.add(fullscreen);
 		options.add(lightMode);
@@ -151,7 +225,13 @@ public class App extends javax.swing.JFrame{
 	}
 	
 	//Function that create the components for a new review
-	public static void createNewEntry(JPanel parent_panel) {
+	public static void createNewEntry(JPanel parent_panel, JTextField title, JSlider rating, JTextArea review, JTextField director, JComboBox comboBox,JTextField holder) {
+		//
+		//JTextfield title
+		//JSlider rating
+		//JTextArea review
+		//JTextfield 
+		//
 		parent_panel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(2,2,2,2);
@@ -160,7 +240,7 @@ public class App extends javax.swing.JFrame{
 		gbc.weightx = 0.75;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
-		JTextField title = new JTextField("Title");
+		
 		title.setPreferredSize(new Dimension(150,35));
 		title.addFocusListener(new FocusListener() {
 			@Override
@@ -192,10 +272,7 @@ public class App extends javax.swing.JFrame{
 		labelTable.put(20,new JLabel("10"));
 		
 		
-		JSlider rating = new JSlider(JSlider.HORIZONTAL,0,20,0);
-		//Font rFont = rating.getFont().deriveFont(8);
-		//rating.setFont(rFont);
-		//rating.setFont(rating.getFont());
+		
 		rating.setPreferredSize(new Dimension(50,40));
 		rating.setLabelTable(labelTable);
 		rating.setMajorTickSpacing(2);
@@ -204,7 +281,10 @@ public class App extends javax.swing.JFrame{
 		rating.setPaintLabels(true);
 		parent_panel.add(rating,gbc);
 		
-		JTextField review = new JTextField("Write Your Review Here");
+		
+		//review.setHorizontalAlignment(JTextField.LEFT);
+		//review.setAlignmentY(0);
+		review.setLineWrap(true);
 		review.setPreferredSize(new Dimension(200,500));
 		review.addFocusListener(new FocusListener() {
 			@Override
@@ -228,7 +308,7 @@ public class App extends javax.swing.JFrame{
 		parent_panel.add(review,gbc);
 		
 		//Create the Director Text Field
-		JTextField director = new JTextField("Enter this Film's Director Here");
+		
 		director.setPreferredSize(new Dimension(50,35));
 		director.addFocusListener(new FocusListener() {
 			@Override
@@ -249,19 +329,16 @@ public class App extends javax.swing.JFrame{
 		gbc.gridy = 6;
 		parent_panel.add(director,gbc);
 		
-		//Create the Genre List
-		String genreList[] = {"Action", "Adventure","Comedy","Drama","Fantasy","Horror","Mystery","Pyschological","Romance","Scifi","Thriller","Western"};
-		JList genres = new JList(genreList);
-		JComboBox comboBox = new JComboBox(genreList);
+		//Create the Genre List----------------------------------------------------------
 		comboBox.setPreferredSize(new Dimension(50,35));
 		comboBox.setLightWeightPopupEnabled(true);
 		gbc.gridx = 1;
 		parent_panel.add(comboBox,gbc);
 		
+		System.out.println("Default color:" + director.getBackground().toString());
 		
-		//Testing---------------------
+		//Testing------------------------------------------------------------------------
 		
-		JTextField holder = new JTextField("temp");
 		holder.setPreferredSize(new Dimension(200,50));
 		gbc.gridx = 0;
 		gbc.gridy = 7;
@@ -270,8 +347,7 @@ public class App extends javax.swing.JFrame{
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 		
 		parent_panel.add(holder,gbc);
-		//----------------------------
-		
+		//--------------------------------------------------------------------------------
 		parent_panel.validate();
 	}
 	
@@ -286,6 +362,9 @@ public class App extends javax.swing.JFrame{
 		JFrame main_frame = new JFrame("Movie Reviewer");
 		main_frame.setUndecorated(false);
 		
+		//Then we want to do the database
+		String pathway = selectFilePath(main_frame);
+		databaseSetup(pathway);
 		
 		//Lets set up the Layout - right now we are choosing BorderLayout
 		Container pane = main_frame.getContentPane();
@@ -333,7 +412,22 @@ public class App extends javax.swing.JFrame{
 		search_constraints.fill = GridBagConstraints.HORIZONTAL;
 		
 		//Search Panel Elements------------------------------------
-		JTextField tf_search = new JTextField("Enter a Movie Title");
+		JTextField tf_search = new JTextField("");
+		//tf_search.setToolTipText("Enter A Movie Title to Search For");
+		tf_search.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e){
+				if (tf_search.getText().trim().equals("Enter a Movie Title to Search")){
+					tf_search.setText("");
+				}
+			}
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(tf_search.getText().trim().equals("")){
+					tf_search.setText("Enter a Movie Title to Search");
+				}
+			}
+		});
 		search_panel.add(tf_search,search_constraints);
 		
 		JButton b_search = new JButton("Search");
@@ -352,7 +446,7 @@ public class App extends javax.swing.JFrame{
 		
 		
 		//Building our Tool Bar------------------------------------
-		buildToolBar(main_frame,right_panel,left_panel,search_panel,panel_grid,b_search);
+		buildToolBar(main_frame,right_panel,left_panel,search_panel,panel_grid,b_search,pathway);
 		
 		
 		//Adding all the components to the Main Frame--------------
@@ -370,9 +464,6 @@ public class App extends javax.swing.JFrame{
 		main_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);			//Sets the Window to Full Screen when opened
 		main_frame.setVisible(true);
 		
-		
-		String pathway = selectFilePath(main_frame);
-		databaseSetup(pathway);
 	}
 	
 	
@@ -404,16 +495,15 @@ public class App extends javax.swing.JFrame{
 	
 	public static void databaseSetup(String path) {
 		//Connect to DataBase------------------------------------
-		
-		//Connection conn = null;
-		
+		System.out.println("File path selected: " + path);
 		String url = "jdbc:sqlite:" + path + "/MovieReviewer.db";
-		
-		try(Connection conn = DriverManager.getConnection(url)) {
+		Connection conn = null;
+		try{
+			conn = DriverManager.getConnection(url);
 			if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                System.out.println("A connection has been made and a new database has been created.");
             }
 		}catch(SQLException e){
 			System.out.println(e.getMessage());
@@ -422,17 +512,48 @@ public class App extends javax.swing.JFrame{
 		
 		//-------------------------------------------------------
 		//Creating Table if it doesn't exist---------------------
-		String sql = "CREATE TABLE IF NOT EXISTS REVIEWS" +
-				"(id integer PRIMARY KEY,"+
-				"	title text)";
-		
-		try(Connection conn = DriverManager.getConnection(url);
-				Statement stmt = conn.createStatement()){
-					stmt.executeUpdate(sql);
-				}catch(Exception e) {
+		String sql = "CREATE TABLE IF NOT EXISTS REVIEWS"
+				+ "(id integer PRIMARY KEY,"
+				+ "	title text NOT NULL,"
+				+ " rating double NOT NULL,"
+				+ " director text NOT NULL"
+				+ ");";
+		try{
+			//conn = DriverManager.getConnection(url);
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(sql);
+		}catch(Exception e) {
 					System.out.println(e.getMessage());
 					System.exit(1);
+		}
+		
+		String sql_string = "INSERT INTO REVIEWS (id,title,rating,director) VALUES(?,?,?,?)";
+		
+		try{
+			conn.setAutoCommit(false);
+			PreparedStatement sql_exe = conn.prepareStatement(sql_string);
+			sql_exe.setInt(1,1);
+			sql_exe.setString(2,"Machester");
+			sql_exe.setDouble(3,7.0);
+			sql_exe.setString(4,"Casey");
+			sql_exe.executeUpdate();
+			conn.commit();
+			conn.close();
+			System.out.println();
+		}catch(Exception ee){
+			System.out.println("Error adding first:" + ee.getMessage());
+			ee.printStackTrace();
+		}
+		/*
+		finally {
+			try {
+				if(conn!=null) {
+					conn.close();
 				}
+			}catch(Exception e){
+				System.out.println(e.getMessage());
+			}
+		}*/
 	}
 	
 	public static void main(String[] args){
@@ -444,7 +565,6 @@ public class App extends javax.swing.JFrame{
             } 
         });
 	}
-	
 }
 
 class JSearchButton extends JButton{
