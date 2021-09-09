@@ -5,6 +5,7 @@ import java.awt.event.*;
 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -28,6 +29,27 @@ public class App extends javax.swing.JFrame{
 	final static boolean shouldFill = true; 
     final static boolean shouldWeightX = true;
 	
+    public static class ID{
+    	private static int val = 0;
+    	private static int max = 0;
+    	private static int loaded = 0;
+    	public static int getVal(){
+    		return ID.val;
+    	}
+    	public static int getMax() {
+    		return ID.max;
+    	}
+    	public static void reload() {
+    		loaded = max;
+    	}
+    	public static void incVal(){
+    		ID.val++;
+    		ID.max++;
+    	}
+    	public static void setVal(int v){
+    		ID.val = v;
+    	}
+    }
 	/*
 	public static void assemble_Frame(Container pane) {
 		JButton bNew,bOptions,bExport,bSearch;
@@ -76,6 +98,10 @@ public class App extends javax.swing.JFrame{
 		Menu options = new Menu("Options");
 				
 		Menu export = new Menu("Export");
+		
+		//--------------------------------Database Stuff
+		
+		String URL = "jdbc:sqlite:" + url + "/MovieReviewer.db";
 		
 		//--------------------------------
 		JTextField title = new JTextField("Title");
@@ -162,19 +188,51 @@ public class App extends javax.swing.JFrame{
 	      {  
 	    	//TODO: create a new panel(?) and add it to left_panel
 			//TODO: add an entry into the DB for a new entry
-	    	
+	    	ID.setVal(ID.getMax());
+	    	  
 			createNewEntry(right_panel,title,rating,review,director,comboBox,holder);
 	    	
 	        System.out.println("Make New Module");
 	      }  
 	    });
+		
+		MenuItem bRefresh = new MenuItem("Refresh");
+		bRefresh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Connection con = DriverManager.getConnection(URL);
+					System.out.println("Loading from: " + ID.loaded  + " to: " + ID.getMax());
+					for(int i = ID.loaded; i < ID.getMax();i++) {
+						//SQL Statement to get Title Value
+						String sql_string = "SELECT title FROM REVIEWS WHERE ID = " + String.valueOf(i);
+						System.out.println("Making Statement");
+						Statement smt = con.createStatement();
+						System.out.println("Qquerying");
+						ResultSet res = smt.executeQuery(sql_string);
+						System.out.println("Hello?");
+						//--------------------------------  
+						String title = res.getString("title");
+						System.out.println(title);
+						JButton holder = new JButton(title);
+						left_panel.add(holder);
+						ID.loaded = i+1;
+					}
+					con.close();
+					left_panel.validate();
+				}catch(SQLException sqle){
+					
+				}
+			}
+		});
+		
+		//int ID = 0;
 		MenuItem bSave = new MenuItem("Save");
 		bSave.addActionListener ( new ActionListener()  
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
 	    	//TODO:create functionality to insert or update the review to the DB
-	    	int ID = 0;
+	    	
 	    	String title_data = title.getText();
 	    	Double rating_data = (rating.getValue()/2.0);
 	    	String dir_data = director.getText();
@@ -183,32 +241,33 @@ public class App extends javax.swing.JFrame{
 	    						"VALUES (?,?,?,?)";
 	    	
 	    	try{
-	    		System.out.println("Attempting to establish connection: " + url);
-	    		
-	    		String URL = "jdbc:sqlite:" + url + "/MovieReviewer.db"; 
+	    		//System.out.println("Attempting to establish connection: " + url); 
 	    		Connection con = DriverManager.getConnection(URL);
 	    		con.setAutoCommit(false);
 	    		
-	    		System.out.println("Connection Established.");
+	    		//System.out.println("Connection Established.");
 	    		
 	    		PreparedStatement sql_exe = con.prepareStatement(sql_string);
-	    		sql_exe.setInt(1,ID);
+	    		System.out.println("Saving under ID:" + ID.getVal());
+	    		sql_exe.setInt(1,ID.getVal());
 	    		sql_exe.setString(2,title_data);
 	    		sql_exe.setDouble(3,rating_data);
 	    		sql_exe.setString(4,dir_data);
 	    		sql_exe.executeUpdate();
 	    		con.commit();
+	    		ID.incVal();
+	    		System.out.println("New Max is: " + ID.getMax());
 	    	}catch(Exception ex){
 	    		System.out.println("Error saving value to DB: " + ex.getMessage());
-	    		System.exit(1);
+	    		
 	    	}
-	        
 	      }  
 	    });
 		
 		//Adding our buttons and sub menus
 		file.add(bNew);
 		file.add(bSave);
+		file.add(bRefresh);
 		
 		options.add(fullscreen);
 		options.add(lightMode);
@@ -335,7 +394,7 @@ public class App extends javax.swing.JFrame{
 		gbc.gridx = 1;
 		parent_panel.add(comboBox,gbc);
 		
-		System.out.println("Default color:" + director.getBackground().toString());
+		//System.out.println("Default color:" + director.getBackground().toString());
 		
 		//Testing------------------------------------------------------------------------
 		
@@ -432,8 +491,8 @@ public class App extends javax.swing.JFrame{
 		
 		JButton b_search = new JButton("Search");
 		
-		System.out.println(b_search.getForeground().toString());
-		System.out.println(b_search.getBackground().toString());
+		//System.out.println(b_search.getForeground().toString());
+		//System.out.println(b_search.getBackground().toString());
 		b_search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Searching for:" + tf_search.getText());
@@ -502,7 +561,7 @@ public class App extends javax.swing.JFrame{
 			conn = DriverManager.getConnection(url);
 			if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
+                //System.out.println("The driver name is " + meta.getDriverName());
                 System.out.println("A connection has been made and a new database has been created.");
             }
 		}catch(SQLException e){
@@ -527,6 +586,7 @@ public class App extends javax.swing.JFrame{
 					System.exit(1);
 		}
 		
+		/*
 		String sql_string = "INSERT INTO REVIEWS (id,title,rating,director) VALUES(?,?,?,?)";
 		
 		try{
@@ -544,6 +604,7 @@ public class App extends javax.swing.JFrame{
 			System.out.println("Error adding first:" + ee.getMessage());
 			ee.printStackTrace();
 		}
+		*/
 		/*
 		finally {
 			try {
