@@ -39,6 +39,9 @@ public class App extends javax.swing.JFrame{
     	public static int getMax() {
     		return ID.max;
     	}
+    	public static void setMax(int m) {
+    		max = m;
+    	}
     	public static void reload() {
     		loaded = max;
     	}
@@ -50,44 +53,42 @@ public class App extends javax.swing.JFrame{
     		ID.val = v;
     	}
     }
-	/*
-	public static void assemble_Frame(Container pane) {
-		JButton bNew,bOptions,bExport,bSearch;
-		JTextField tf_search;
-		
-		//Setting out layout--------------------------------------------------------
-		if(RIGHT_TO_LEFT) {
-			pane.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		}
-		
-		pane.setLayout(new GridBagLayout());
-		GridBagConstraints constraint = new GridBagConstraints();
-		if(shouldFill) {
-			constraint.fill = GridBagConstraints.HORIZONTAL;
-		}
-		if(shouldWeightX) {
-			constraint.weightx = 0.5;
-		}
-		//--------------------------------------------------------------------------
-		//Buttons
-		//Adding a text box for search function
-		tf_search = new JTextField("");
-		//tf_search.setToolTipText("Enter a Movie Title");
-		constraint.fill = GridBagConstraints.HORIZONTAL;
-		constraint.ipady = 20;
-		constraint.weightx = 0.0;
-		constraint.gridwidth = 2;
-		constraint.gridx = 0;
-		constraint.gridy = 1;										//request any extra vertical space
-		pane.add(tf_search,constraint);
-		
-		//Adding a search button
-		bSearch = new JButton("Search");
-		constraint.gridx = 2;
-		constraint.gridy = 1;
-		pane.add(bSearch,constraint);
-	}
-	*/
+    
+    //This is a class that replicates Grid Bag Constraints so that we can edit it anywhere
+    public static class DBCons{
+    	private static GridBagConstraints GBC = new GridBagConstraints();
+    	//TODO: make methods to increment and change gbc settings like gridx and gridy and etc
+    	private static JButton entryList[] = new JButton[256];
+    	public static void init() {
+    		GBC.gridx = 0;
+			GBC.gridy = 0;
+			GBC.gridwidth = 1;
+			GBC.weightx = 1;
+			GBC.fill = GridBagConstraints.HORIZONTAL;
+			GBC.anchor = GridBagConstraints.NORTHWEST;
+    		System.out.println("Init Y: " + GBC.gridy + "\nInit X: " + GBC.gridx);
+    	}
+    	public static void incY() {
+    		GBC.gridy++;
+    	}
+    	public static void incX() {
+    		GBC.gridx++;
+    	}
+    	public static GridBagConstraints getContraints() {
+    		return GBC;
+    	}
+    	public static void addEntry(JButton entry,int index) {
+    		entryList[index] = entry;
+    	}
+    	public static void removeEntry(int index) {
+    		//TODO: Add a function that removes a certain index and moves all indexs up like a linked list
+    	}
+    	public static JButton getEntry(int index) {
+    		return entryList[index];
+    	}
+    }
+    
+	
 	//We add buttons to our tool bar here-------------------------
 	public static void buildToolBar(JFrame frame,JPanel right_panel, JPanel left_panel,JPanel search_panel, JPanel grid_panel, JButton b_search,String url){
 		MenuBar toolBar = new MenuBar();
@@ -100,7 +101,7 @@ public class App extends javax.swing.JFrame{
 		Menu export = new Menu("Export");
 		
 		//--------------------------------Database Stuff
-		
+		DBCons.init();
 		String URL = "jdbc:sqlite:" + url + "/MovieReviewer.db";
 		
 		//--------------------------------
@@ -186,8 +187,7 @@ public class App extends javax.swing.JFrame{
 	    {  
 	      public void actionPerformed( ActionEvent e )  
 	      {  
-	    	//TODO: create a new panel(?) and add it to left_panel
-			//TODO: add an entry into the DB for a new entry
+	    	//TODO: Make a function to clear the entry and instead change everything to default
 	    	ID.setVal(ID.getMax());
 	    	  
 			createNewEntry(right_panel,title,rating,review,director,comboBox,holder);
@@ -199,33 +199,10 @@ public class App extends javax.swing.JFrame{
 		MenuItem bRefresh = new MenuItem("Refresh");
 		bRefresh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					Connection con = DriverManager.getConnection(URL);
-					System.out.println("Loading from: " + ID.loaded  + " to: " + ID.getMax());
-					for(int i = ID.loaded; i < ID.getMax();i++) {
-						//SQL Statement to get Title Value
-						String sql_string = "SELECT title FROM REVIEWS WHERE ID = " + String.valueOf(i);
-						System.out.println("Making Statement");
-						Statement smt = con.createStatement();
-						System.out.println("Qquerying");
-						ResultSet res = smt.executeQuery(sql_string);
-						System.out.println("Hello?");
-						//--------------------------------  
-						String title = res.getString("title");
-						System.out.println(title);
-						JButton holder = new JButton(title);
-						left_panel.add(holder);
-						ID.loaded = i+1;
-					}
-					con.close();
-					left_panel.validate();
-				}catch(SQLException sqle){
-					
-				}
+				refreshDB(url,left_panel);
 			}
 		});
 		
-		//int ID = 0;
 		MenuItem bSave = new MenuItem("Save");
 		bSave.addActionListener ( new ActionListener()  
 	    {  
@@ -443,6 +420,7 @@ public class App extends javax.swing.JFrame{
 		
 		JPanel left_panel = new JPanel();
 		left_panel.setBackground(Color.green);
+		left_panel.setLayout(new GridBagLayout());
 		
 		//Setting up constraints for our two panels-----------------
 		GridBagConstraints panel_constraints = new GridBagConstraints();
@@ -531,6 +509,67 @@ public class App extends javax.swing.JFrame{
 		System.out.println(e);
 	}
 	
+	//This function will refresh the left panel will entries from the DB
+	//Takes in the path to the DB
+	//Returns nothing
+	public static void refreshDB(String path, JPanel left_panel){
+		String URL = "jdbc:sqlite:" + path + "/MovieReviewer.db";
+		try {
+			Connection con = DriverManager.getConnection(URL);
+			
+			//Refreshing the Max from the DB
+			String sql_str = "SELECT MAX(id) FROM REVIEWS";
+			Statement sql_smt = con.createStatement();
+			ResultSet result_ID = sql_smt.executeQuery(sql_str);
+			int maxID = result_ID.getInt(1) + 1;
+			ID.setMax(maxID);
+			
+			//System.out.println("Max ID loaded as: " + maxID);
+			//System.out.println("Loading from: " + ID.loaded  + " to: " + (ID.getMax()-1));
+			if(ID.loaded > 0) {
+				GridBagConstraints gbc_last = DBCons.getContraints();
+				JButton last = DBCons.getEntry(ID.loaded - 1);
+				if (last == null) {
+					System.out.println("Can't get button");
+					System.exit(1);
+				}
+				gbc_last.weighty = 0;
+				left_panel.remove(left_panel.getComponent(ID.loaded - 1));
+				left_panel.add(last,gbc_last);
+				DBCons.incY();
+			}
+			for(int i = ID.loaded; i < ID.getMax();i++) {
+				//SQL Statement to get Title Value
+				String sql_string = "SELECT title FROM REVIEWS WHERE ID = " + String.valueOf(i);
+				Statement smt = con.createStatement();
+				ResultSet res = smt.executeQuery(sql_string);
+				String title = res.getString("title");
+				//--------------------------------
+				
+				//Creating the Button----------------------------
+				JButton holder = new JButton(title);
+				//holder.setSize(200,100);
+				//-----------------------------------------------
+				
+				//Setting the GridBagConstraints 
+				GridBagConstraints gbc = DBCons.getContraints();
+				if(i == ID.getMax()-1) {
+					System.out.println();
+					gbc.weighty = 1;
+				}
+				left_panel.add(holder,gbc);
+				DBCons.incY();
+				DBCons.addEntry(holder,i);
+				ID.loaded = i+1;
+			}
+			
+			con.close();
+			left_panel.validate();
+		}catch(SQLException sqle){
+			System.out.println(sqle.getMessage());
+		}
+	}
+	
 	
 	//This is the function used to select file path for the DB
 	//Function takes in the main_frame as argument
@@ -586,35 +625,6 @@ public class App extends javax.swing.JFrame{
 					System.exit(1);
 		}
 		
-		/*
-		String sql_string = "INSERT INTO REVIEWS (id,title,rating,director) VALUES(?,?,?,?)";
-		
-		try{
-			conn.setAutoCommit(false);
-			PreparedStatement sql_exe = conn.prepareStatement(sql_string);
-			sql_exe.setInt(1,1);
-			sql_exe.setString(2,"Machester");
-			sql_exe.setDouble(3,7.0);
-			sql_exe.setString(4,"Casey");
-			sql_exe.executeUpdate();
-			conn.commit();
-			conn.close();
-			System.out.println();
-		}catch(Exception ee){
-			System.out.println("Error adding first:" + ee.getMessage());
-			ee.printStackTrace();
-		}
-		*/
-		/*
-		finally {
-			try {
-				if(conn!=null) {
-					conn.close();
-				}
-			}catch(Exception e){
-				System.out.println(e.getMessage());
-			}
-		}*/
 	}
 	
 	public static void main(String[] args){
