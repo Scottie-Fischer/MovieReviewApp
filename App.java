@@ -20,46 +20,63 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JFrame;
 
+/*
+private static final int LIGHT_LIGHT = 155;
+private static final int LIGHT_DARK  = 205;
+private static final int DARK_LIGHT  = 62;
+private static final int DARK_DARK   = 165;
+*/
+
+/*
+class settingsClass{
+   
+   private Color light = LIGHT_LIGHT;
+   private Color dark = light_dark;
+
+   
+   //public Settings(){}
+   public static void update_color(Color light, Color dark){
+      light = light;
+      dark = dark;
+   }
+   public static Color get_color_light(){return light;}
+   public static Color get_color_dark(){return dark;}
+
+	
+}
+*/
 class App extends javax.swing.JFrame{
-  
+   public static final Color LIGHT_LIGHT = new Color(155,155,155);
+   public static final Color LIGHT_DARK = new Color(205,205,205);
+   public static final Color DARK_LIGHT = new Color(62,62,62);
+   public static final Color DARK_DARK = new Color(165,165,165);
+
+
 
    JPanel main_panel,right_panel,left_panel;
    final static boolean RIGHT_TO_LEFT = false;
    final static boolean shouldFill = true;
    final static boolean shouldWeightX = true;   
+   
 
-   //This is the main function of the GUI
-   public static void create_frame(){
-      //This is the main frame window
-      JFrame main_frame = new JFrame("Movie Reviewist");
-      main_frame.setUndecorated(false);
 
-      //Create Database Here
-      //
-      //
-      //------------------------------
- 
-      //Set the Layout
-      Container pane = main_frame.getContentPane();
+//============This is the Model section of GUi=========================
+   public static void build_db(String path){
 
-      //Setting up the Panels--------------------------------
- 
-      JPanel search_panel = new JPanel();
-      search_panel.setBackground(Color.blue);
-      search_panel.setLayout(new GridBagLayout());
 
-      JPanel panel_grid   = new JPanel();
+   }
+
+
+   public static void build_panels(JPanel panel_grid, JPanel right_panel, JPanel left_panel){
       panel_grid.setBackground(Color.white);
       panel_grid.setLayout(new GridBagLayout());
-
-      //This will fields how data entry
-      JPanel right_panel  = new JPanel();
+      
       right_panel.setBackground(Color.black);
 
-      JPanel left_panel   = new JPanel();
+      //This holds DB fields
+      //JPanel left_panel   = new JPanel();
       left_panel.setBackground(Color.green);
       left_panel.setLayout(new GridBagLayout());
-      //-----------------------------------------------------
 
       //Setting the contraints for Panels--------------------
       GridBagConstraints panel_constraints = new GridBagConstraints();
@@ -77,7 +94,20 @@ class App extends javax.swing.JFrame{
 
       panel_grid.add(right_panel,panel_constraints);
       //---------------------------------------------------------------
+   }
 
+   public static void build_toolbar(){
+   
+   
+   }
+
+   //This builds the search bar
+   //Returns the JPanel element of the search bar that holds Button and Text Field
+   public static JPanel build_searchbar(JButton search_button, JTextField search_tf){
+      JPanel search_panel = new JPanel();
+      search_panel.setBackground(Color.blue);
+      search_panel.setLayout(new GridBagLayout());
+      
       //Search Constraints
       GridBagConstraints search_constraints = new GridBagConstraints();
       search_constraints.insets = new Insets(7,5,7,5);
@@ -88,40 +118,85 @@ class App extends javax.swing.JFrame{
       search_constraints.fill = GridBagConstraints.HORIZONTAL;
 
       //Search Panel Elements==========================================
-      
-      //Search Text Field
-      JTextField search_tf = new JTextField("");
+
+      //Search Text Field Action Listener
       search_tf.addFocusListener(new FocusListener(){
          @Override
-	 //Listens for when you select the text field. 
-	 //Empties text when selected
+         //Listens for when you select the text field. 
+         //Empties text when selected
          public void focusGained(FocusEvent e){
             if(search_tf.getText().trim().equals("Enter a Movie Title to Search")){
-	       search_tf.setText("");	    
+               search_tf.setText("");
             }
-	 }
-	 @Override
-	 //If the Text Box is Empty it refills it with default text
-	 public void focusLost(FocusEvent e){
+         }
+         @Override
+         //If the Text Box is Empty it refills it with default text
+         public void focusLost(FocusEvent e){
             if(search_tf.getText().trim().equals("")){
                search_tf.setText("Enter a Movie Title to Search");
-	    }
-	 }
+            }
+         }
       });
       search_panel.add(search_tf,search_constraints);
-      
-      //Search Button
-      JButton search_button = new JButton("Search");
+      //===============================================================
+      //Search Button--------------------------------------------------
 
       //TODO: this is for debugging. Edit to look into DB by movie title
       search_button.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
              System.out.println("Searching for:" + search_tf.getText());
-	 }
+         }
       });
       search_constraints.gridx++;
       search_constraints.weightx = 0.05;
       search_panel.add(search_button,search_constraints);
+      //--------------------------------------------------------------
+
+
+      return search_panel;
+   }
+
+//===========This is the controller section of GUI=========================
+//This section holds the elements for all the elements that changes the model
+//This is responsible for user input and output
+
+
+//=============This is the view sections of the GUI===================
+   public static void create_frame(){
+      //This is the main frame window
+      JFrame main_frame = new JFrame("Movie Reviewist");
+      main_frame.setUndecorated(false);
+
+      settingsClass Settings;
+
+      //Create Database Here
+      //
+      //
+      //------------------------------
+ 
+      //Set the Layout--------------------------------------
+      Container pane = main_frame.getContentPane();
+
+      //Setting up the Panels--------------------------------
+ 
+      //Holds the search bars
+      JTextField search_tf = new JTextField("");
+      JButton search_button = new JButton("Search");
+      JPanel search_panel = build_searchbar(search_button,search_tf);
+
+      //Holds the other panels
+      JPanel panel_grid   = new JPanel();
+      
+      //This holds the fields for data entry
+      JPanel right_panel  = new JPanel();
+
+      //This holds DB fields
+      JPanel left_panel   = new JPanel();
+   
+      build_panels(panel_grid,right_panel,left_panel);
+      //-----------------------------------------------------
+       
+      //--------------------------------------------------------------
 
       pane.add(search_panel,BorderLayout.NORTH);
       pane.add(panel_grid,BorderLayout.CENTER);
@@ -137,6 +212,12 @@ class App extends javax.swing.JFrame{
    }	   
 
    public static void main(String[] args){
+      
+      //public static final int LIGHT_LIGHT = 155;
+      //public static final int LIGHT_DARK  = 205;
+      //public static final int DARK_LIGHT  = 62;
+      //public static final int DARK_DARK   = 165;
+
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
          public void run(){
             create_frame();
