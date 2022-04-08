@@ -46,8 +46,8 @@ class settingsClass{
 }
 */
 class App extends javax.swing.JFrame{
-   public static final Color LIGHT_LIGHT = new Color(155,155,155);
-   public static final Color LIGHT_DARK = new Color(205,205,205);
+   public static final Color LIGHT_DARK = new Color(155,155,155);
+   public static final Color LIGHT_LIGHT = new Color(205,205,205);
    public static final Color DARK_LIGHT = new Color(62,62,62);
    public static final Color DARK_DARK = new Color(165,165,165);
 
@@ -68,14 +68,14 @@ class App extends javax.swing.JFrame{
 
 
    public static void build_panels(JPanel panel_grid, JPanel right_panel, JPanel left_panel){
-      panel_grid.setBackground(Color.white);
+      panel_grid.setBackground(LIGHT_DARK);
       panel_grid.setLayout(new GridBagLayout());
       
-      right_panel.setBackground(Color.black);
+      right_panel.setBackground(LIGHT_LIGHT);
 
       //This holds DB fields
       //JPanel left_panel   = new JPanel();
-      left_panel.setBackground(Color.green);
+      left_panel.setBackground(LIGHT_LIGHT);
       left_panel.setLayout(new GridBagLayout());
 
       //Setting the contraints for Panels--------------------
@@ -88,6 +88,7 @@ class App extends javax.swing.JFrame{
       panel_constraints.weighty = 0.25;
       panel_constraints.fill    = GridBagConstraints.BOTH;
 
+
       panel_grid.add(left_panel,panel_constraints);
       panel_constraints.gridx++;
       panel_constraints.weightx = 1;
@@ -97,7 +98,7 @@ class App extends javax.swing.JFrame{
    }
 
    public static void build_toolbar(){
-   
+      
    
    }
 
@@ -105,7 +106,7 @@ class App extends javax.swing.JFrame{
    //Returns the JPanel element of the search bar that holds Button and Text Field
    public static JPanel build_searchbar(JButton search_button, JTextField search_tf){
       JPanel search_panel = new JPanel();
-      search_panel.setBackground(Color.blue);
+      search_panel.setBackground(LIGHT_LIGHT);
       search_panel.setLayout(new GridBagLayout());
       
       //Search Constraints
@@ -160,14 +161,28 @@ class App extends javax.swing.JFrame{
 //This section holds the elements for all the elements that changes the model
 //This is responsible for user input and output
 
+   public static void fullscreen(JFrame frame, MenuItem fullscreen){
+      fullscreen.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+	    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+	 }
+      });
+   } 
 
+   public static void dark_mode(){
+
+   }
+   
+   public static void light_mode(){
+
+   }
 //=============This is the view sections of the GUI===================
    public static void create_frame(){
       //This is the main frame window
       JFrame main_frame = new JFrame("Movie Reviewist");
       main_frame.setUndecorated(false);
 
-      settingsClass Settings;
+      //settingsClass Settings;
 
       //Create Database Here
       //
@@ -185,7 +200,7 @@ class App extends javax.swing.JFrame{
       JPanel search_panel = build_searchbar(search_button,search_tf);
 
       //Holds the other panels
-      JPanel panel_grid   = new JPanel();
+      JPanel grid_panel   = new JPanel();
       
       //This holds the fields for data entry
       JPanel right_panel  = new JPanel();
@@ -193,13 +208,51 @@ class App extends javax.swing.JFrame{
       //This holds DB fields
       JPanel left_panel   = new JPanel();
    
-      build_panels(panel_grid,right_panel,left_panel);
+      build_panels(grid_panel,right_panel,left_panel);
       //-----------------------------------------------------
-       
+      MenuBar toolbar = new MenuBar();
+      Menu menu_file = new Menu("File");
+      Menu menu_options = new Menu("Options");
+      Menu menu_export = new Menu("Export");
+      
+      MenuItem fullscreen = new MenuItem("Fullscreen");
+      fullscreen(main_frame,fullscreen);
+      
+      MenuItem light_mode = new MenuItem("Light Mode");
+      light_mode.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+	    main_frame.setBackground(LIGHT_DARK);
+	    right_panel.setBackground(LIGHT_DARK);
+	    left_panel.setBackground(LIGHT_DARK);
+	    search_panel.setBackground(LIGHT_DARK);
+	    grid_panel.setBackground(new Color(200,200,200));
+	 }
+      });
+      
+      MenuItem dark_mode = new MenuItem("Dark Mode");
+      dark_mode.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+	    main_frame.setBackground(DARK_DARK);
+            right_panel.setBackground(DARK_DARK);
+            left_panel.setBackground(DARK_DARK);
+            search_panel.setBackground(DARK_DARK);
+            grid_panel.setBackground(new Color(32,32,32));
+	 }
+      });
+
+      menu_options.add(fullscreen);
+      menu_options.add(light_mode);
+      menu_options.add(dark_mode);
+
+      toolbar.add(menu_file);
+      toolbar.add(menu_options);
+      toolbar.add(menu_export);
+
+      main_frame.setMenuBar(toolbar);
       //--------------------------------------------------------------
 
       pane.add(search_panel,BorderLayout.NORTH);
-      pane.add(panel_grid,BorderLayout.CENTER);
+      pane.add(grid_panel,BorderLayout.CENTER);
 
       Dimension min_size = new Dimension(400,400); //Sets minimum window size
       main_frame.setResizable(true);
