@@ -58,6 +58,7 @@ class App extends javax.swing.JFrame{
    final static boolean shouldFill = true;
    final static boolean shouldWeightX = true;   
    
+   public static boolean entry_flag = false;
 
 
 //============This is the Model section of GUi=========================
@@ -176,6 +177,27 @@ class App extends javax.swing.JFrame{
    public static void light_mode(){
 
    }
+   public static void create_new_entry(MenuItem new_entry, JComboBox genres,
+		                       JSlider rating,JTextArea review,
+				       JTextField director,JTextField title,
+				       JPanel right_panel
+				       ){
+	   
+      new_entry.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+            if(entry_flag){
+               System.out.println("Refreshing Panels");
+               
+            }else{
+               entry_flag = true;
+               //IF we have not yet created the elements
+	       //We will add them to the right_panel
+	       
+            }
+         }
+      });
+
+   }
 //=============This is the view sections of the GUI===================
    public static void create_frame(){
       //This is the main frame window
@@ -239,7 +261,33 @@ class App extends javax.swing.JFrame{
             grid_panel.setBackground(new Color(32,32,32));
 	 }
       });
-
+      
+      MenuItem new_entry = new MenuItem("New");
+      
+      JTextField title = new JTextField("Title");
+      String genreList[] = {"Action","Adventure","Comedy","Drama",
+	                    "Fantasy","Horror","Mystery","Pyschological",
+		            "Romance","Scifi","Thriller","Wester"}
+      JList genresL = new JList(genreList);
+      JComboBoc genres = new JComboBox(genreL);
+      JSlider rating = new JSlider(JSlider.HORIZONTAL,0,20,0);
+      JTextArea review = new JTextArea("Write Your Review Here");
+      JTextField director = new JTextField("Enter the Director's Name Here");
+      
+      create_new_entry(new_entry,genres,rating,review,director,title,right_panel);
+      /*
+      new_entry.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+            if(entry_set){
+               System.out.println("Refreshing Panels");
+	       refresh_entry();
+	    }else{
+               entry_set = true;
+	       
+	    }
+	 }
+      });
+      */
       menu_options.add(fullscreen);
       menu_options.add(light_mode);
       menu_options.add(dark_mode);
